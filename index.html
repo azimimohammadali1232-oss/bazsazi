@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="بازسازی">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0f0f0f">
+<script>try{var _ic=document.querySelector('link[rel="apple-touch-icon"]');if(_ic)document.documentElement.style.setProperty('--app-logo','url("'+_ic.href+'")');}catch(e){}</script>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style id="icon-style">
 i.ti{display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;line-height:1;flex-shrink:0;font-style:normal;vertical-align:-.15em}
@@ -1141,7 +1142,7 @@ body{background:var(--bg);color:var(--text);letter-spacing:0}
 /* ---------- Auth (light) ---------- */
 #auth-screen{background:var(--bg)}
 .auth-card{border-radius:28px;border:0;box-shadow:var(--shadow-lg);background:#fff}
-.auth-card::before{content:"";display:block;width:52px;height:52px;border-radius:16px;margin-bottom:18px;background:var(--grad)}
+.auth-card::before{content:"";display:block;width:52px;height:52px;border-radius:16px;margin-bottom:18px;background:var(--app-logo,var(--grad)) center/cover no-repeat}
 .auth-tabs{background:var(--bg3);border-radius:999px;padding:4px}
 .auth-tab{border-radius:999px}
 .auth-tab.active{background:var(--ink);color:var(--on-ink);box-shadow:none}
@@ -2338,7 +2339,7 @@ function withLocalPhotos(doc){
 }
 function canEditServerReport(r){
  const mine=r.created_by===currentSession?.user?.id;
- if(mine)return can('reports.create')||can('reports.edit_own')||can('reports.edit_any');
+ if(mine)return can('reports.edit_own')||can('reports.edit_any')||(r.status==='draft'&&can('reports.create'));
  return r.status==='final'&&can('reports.edit_any');
 }
 async function renderServerReports(force){
@@ -2393,14 +2394,18 @@ function renderArch(){
    const acts=[btn('مشاهده','ti-eye',()=>{const v=withLocalPhotos(doc);generatePDF(v,'view',myPdfView());})];
    if(!draft)acts.push(btn('PDF','ti-file-type-pdf',()=>requestPDF(withLocalPhotos(doc))));
    if(canEditServerReport(raw))acts.push(btn(draft?'ادامه':'ویرایش','ti-pencil',()=>loadDocToForm(withLocalPhotos(doc))));
-   if(can('reports.delete_any')){const b=btn('حذف','ti-trash',()=>deleteServerReport(raw,doc));b.classList.add('danger');acts.push(b);}
+   if(canDeleteServerReport(raw)){const b=btn('حذف','ti-trash',()=>deleteServerReport(raw,doc));b.classList.add('danger');acts.push(b);}
    row(`${escapeHtml(doc.date)}${doc.day?'، '+escapeHtml(doc.day):''}`,
      `گزارش ${escapeHtml(doc.num?toFa(doc.num):'—')}، ${toFa(filled)} بخش پر شده${author?'، ثبت: '+escapeHtml(author):''}`,
      draft?{text:'پیش‌نویس — فقط خودت می‌بینی',color:'var(--amber, #b45309)'}:null,acts);
  });
 }
+function canDeleteServerReport(r){
+ if(can('reports.delete_any'))return true;
+ return r.created_by===currentSession?.user?.id&&can('reports.delete_own');
+}
 async function deleteServerReport(raw,doc){
- if(!can('reports.delete_any')){showToast('فقط مالک و مدیر پروژه می‌توانند گزارش را حذف کنند','error');return;}
+ if(!canDeleteServerReport(raw)){showToast('اجازه حذف این گزارش را نداری','error');return;}
  const label=`گزارش ${doc.num?toFa(doc.num):'بدون شماره'} — ${doc.date||''}`;
  if(!confirm(label+'\n\nاین گزارش برای همیشه از سرور و برای همه اعضا حذف می‌شود و قابل برگشت نیست. حذف شود؟'))return;
  try{
