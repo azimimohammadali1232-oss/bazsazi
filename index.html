@@ -1714,6 +1714,7 @@ button.lx-ava{border:0;cursor:pointer;font-family:inherit}
 <div id="project-modal" class="modal-bg"><div class="modal-card"><div class="modal-head"><h3>ساخت پروژه جدید</h3><button class="modal-close" onclick="closeProjectModal()">×</button></div><div class="field"><label>نام پروژه</label><input id="new-project-name" placeholder="مثال: بازسازی واحد ۳ بلوک A"></div><div class="field"><label>آدرس</label><input id="new-project-address" placeholder="آدرس پروژه"></div><div class="field"><label>توضیحات</label><textarea id="new-project-description" placeholder="توضیحات پروژه"></textarea></div><button class="btn primary" style="width:100%;justify-content:center;margin-top:10px" onclick="createProject()"><i class="ti ti-check"></i> ساخت پروژه</button></div></div>
 <div id="role-modal" class="modal-bg"><div class="modal-card"><div class="modal-head"><h3 id="role-modal-title">نقش جدید</h3><button class="modal-close" onclick="closeRoleModal()" aria-label="بستن">×</button></div><div class="field"><label for="role-name">نام نقش</label><input id="role-name" maxlength="60" placeholder="اسم دلخواه، مثلاً: سرپرست کارگاه"></div><div id="role-suggest" style="margin-top:10px"></div><div class="field" style="margin-top:10px"><label for="role-desc">توضیح (اختیاری)</label><input id="role-desc" maxlength="200" placeholder="این نقش برای چه کسی است؟"></div><div class="team-sub" style="margin-top:16px">این نقش چه کارهایی می‌تواند بکند؟</div><div id="role-perms" class="perm-list"></div><div class="team-sub" style="margin-top:18px">در خروجی PDF این نقش چه چیزی بیاید؟</div><div class="muted" style="margin-bottom:8px">بخش‌هایی که اینجا خاموش کنی در نسخه PDF این نقش نمی‌آیند. بخش‌هایی که بعداً بسازی به‌طور پیش‌فرض نمایش داده می‌شوند.</div><div id="role-pdf"></div><div class="muted" style="margin-top:10px">مدیریت اعضا، نقش‌ها و حذف پروژه همیشه فقط دست مالک است.</div><button id="role-save" class="btn primary" style="width:100%;justify-content:center;margin-top:14px" onclick="saveRole()"><i class="ti ti-check"></i>ذخیره نقش</button></div></div>
 <div id="section-modal" class="modal-bg"><div class="modal-card wide"><div class="modal-head"><h3 id="sec-modal-title">بخش جدید</h3><button class="modal-close" onclick="closeSectionEditor()" aria-label="بستن">×</button></div><div class="field"><label for="sec-title">نام بخش</label><input id="sec-title" maxlength="80" placeholder="مثلاً: کارهای برق‌کاری"></div><div class="team-sub" style="margin-top:16px">آیکون</div><div id="sec-icons" class="icon-pick"></div><div class="team-sub" style="margin-top:16px">نوع بخش</div><div id="sec-kinds" class="kind-pick"></div><div id="sec-config"></div><button id="sec-save" class="btn primary" style="width:100%;justify-content:center;margin-top:18px" onclick="saveSection()"><i class="ti ti-check"></i>ذخیره بخش</button></div></div>
+<div id="rv-modal" class="modal-bg" onclick="if(event.target===this)closeReportViewer()"><div class="modal-card wide" style="width:min(900px,100%);display:flex;flex-direction:column"><div class="modal-head"><h3 id="rv-title">مشاهده گزارش</h3><button class="modal-close" onclick="closeReportViewer()" aria-label="بستن">×</button></div><iframe id="rv-frame" title="متن گزارش" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px;background:#fff"></iframe></div></div>
 <div id="pdf-modal" class="modal-bg"><div class="modal-card"><div class="modal-head"><h3>خروجی PDF برای چه کسی؟</h3><button class="modal-close" onclick="closePdfChooser()" aria-label="بستن">×</button></div><div class="muted" style="margin-bottom:12px">هر نسخه فقط بخش‌ها و مبالغی را دارد که برای آن نقش تعیین کرده‌ای. تنظیمش در «اعضا و نقش‌ها» ← ویرایش نقش است.</div><div id="pdf-options"></div></div></div>
 <div id="tpl-modal" class="modal-bg"><div class="modal-card"><div class="modal-head"><h3>افزودن از قالب‌های آماده</h3><button class="modal-close" onclick="closeTemplatePicker()" aria-label="بستن">×</button></div><div id="tpl-list"></div></div></div>
 <div id="lx-profile-modal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="lx-pf-title"><div class="modal-card">
@@ -1872,8 +1873,8 @@ button.lx-ava{border:0;cursor:pointer;font-family:inherit}
 <div id="dyn-sections"></div>
 
 <div class="btn-row">
-  <button class="btn primary" onclick="saveReport(true)"><i class="ti ti-file-type-pdf"></i>ذخیره و خروجی PDF</button>
-  <button class="btn" onclick="saveReport(false)"><i class="ti ti-device-floppy"></i>فقط ذخیره</button>
+  <button class="btn primary" onclick="saveReport('final')"><i class="ti ti-circle-check"></i>ثبت نهایی</button>
+  <button class="btn" onclick="saveReport('draft')"><i class="ti ti-device-floppy"></i>ذخیره پیش‌نویس</button>
 </div>
 </div><!-- /lx-form-main -->
 <aside id="lx-form-aside" aria-label="خلاصه گزارش امروز">
@@ -1890,7 +1891,7 @@ button.lx-ava{border:0;cursor:pointer;font-family:inherit}
 <!-- ===== ARCHIVE ===== -->
 <div class="main" id="tab-archive" style="display:none">
   <div class="card">
-    <div class="card-header"><i class="ti ti-archive"></i>گزارش‌های ذخیره‌شده روی این دستگاه</div>
+    <div class="card-header"><i class="ti ti-archive"></i>گزارش‌های ثبت‌شده</div>
     <div class="card-body"><div id="arch-list"></div></div>
   </div>
   <div class="card">
@@ -1982,7 +1983,7 @@ button.lx-ava{border:0;cursor:pointer;font-family:inherit}
 
 <div id="lx-savebar" role="region" aria-label="ذخیره گزارش">
   <div class="lx-sb-t"><span id="lx-sb-k">هزینه امروز</span><b><span id="lx-sb-v">۰</span> <small id="lx-sb-u">م‌تومان</small></b></div>
-  <button type="button" onclick="saveReport(false)">ذخیره گزارش</button>
+  <button type="button" onclick="saveReport('final')">ثبت نهایی</button>
 </div>
 </div><!-- /app-shell -->
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-msg"></span></div>
@@ -2247,22 +2248,22 @@ function getReportData(){
    })
  };
 }
-async function saveReportToSupabase(d){
+async function saveReportToSupabase(d,status){
  if(!currentProject||!currentSession)throw new Error('پروژه یا نشست کاربر مشخص نیست');
  const reportNum=parseInt(normDigits(d.num).replace(/[^0-9]/g,''))||null;
  const tomorrow=d.sections.find(s=>s.kind==='text'&&projectSections.find(p=>p.id===s.id)?.template_key==='tomorrow');
- const {data:report,error}=await supabaseClient.from('reports').insert({
-   project_id:currentProject.id,created_by:currentSession.user.id,report_number:reportNum,
-   report_date:d.dateISO,report_day:d.day||null,address:d.addr||null,tomorrow_plan:tomorrow?.data?.text||null
- }).select().single();
- if(error)throw error;
  // photos go to Storage in a later stage; here only their captions are kept
- const rows=d.sections.filter(hasContent).map((s,i)=>({
-   report_id:report.id,section_id:s.id,title:s.title,kind:s.kind,config:s.config,sort:i,
+ const entries=d.sections.filter(hasContent).map((s,i)=>({
+   section_id:s.id,title:s.title,kind:s.kind,config:s.config,sort:i,
    data:s.kind==='photos'?{photos:s.data.photos.map(p=>({cap:p.cap||''})),note:'image files are stored locally until Storage is enabled'}:s.data
  }));
- if(rows.length){const r=await supabaseClient.from('report_section_entries').insert(rows);if(r.error){await supabaseClient.from('reports').delete().eq('id',report.id);throw r.error;}}
- return report;
+ // one call on the server: same project + number + date replaces the earlier report
+ const {data,error}=await supabaseClient.rpc('save_report',{
+   p_project_id:currentProject.id,p_number:reportNum,p_date:d.dateISO||null,p_day:d.day||null,
+   p_address:d.addr||null,p_tomorrow:tomorrow?.data?.text||null,p_status:status,p_entries:entries
+ });
+ if(error)throw error;
+ return data||{};
 }
 function archiveKey(){return 'reports:'+(currentProject?.id||'none');}
 function readArchive(){try{return JSON.parse(localStorage.getItem(archiveKey())||'[]');}catch(e){return [];}}
@@ -2273,53 +2274,146 @@ function writeArchive(list){
  return 'failed';
 }
 let _saving=false;
-async function saveReport(withPdf){
+// mode: 'final' = visible to everyone with access, 'draft' = only the author sees it
+async function saveReport(mode){
  if(_saving)return;
+ const status=(mode==='final'||mode===true)?'final':'draft';
  if(!currentProject){showToast('اول یک پروژه را باز کن','error');return;}
  if(!can('reports.create')){showToast('نقش شما اجازه ثبت گزارش ندارد','error');return;}
  const d=getReportData();
  if(!d.sections.some(hasContent)){showToast('گزارش خالی است؛ حداقل یک بخش را پر کن','error');return;}
- _saving=true;document.querySelectorAll('#tab-form .btn-row .btn').forEach(b=>b.disabled=true);
+ if(status==='final'&&!d.dateISO){showToast('برای ثبت نهایی، تاریخ گزارش را انتخاب کن','error');return;}
+ _saving=true;document.querySelectorAll('#tab-form .btn-row .btn, #lx-savebar button').forEach(b=>b.disabled=true);
+ const key=reportKey(d);
+ // a copy stays on this device (photos live only here); the same number + date replaces the older copy
+ const entry={...d,status,savedAt:new Date().toLocaleString('fa-IR'),unsynced:true};
+ const list=readArchive().filter(r=>!key||reportKey(r)!==key);list.unshift(entry);
+ const local=writeArchive(list);
  try{
-   const entry={...d,savedAt:new Date().toLocaleString('fa-IR')};
-   const list=readArchive();list.unshift(entry);
-   const local=writeArchive(list);
+   const res=await saveReportToSupabase(d,status);
+   const l2=readArchive();const me=l2.find(r=>r.savedAt===entry.savedAt&&reportKey(r)===key);
+   if(me){me.unsynced=false;me.serverId=res.id||null;writeArchive(l2);}
+   if(typeof afterReportSaved==='function')afterReportSaved();
+   const base=status==='final'?'گزارش نهایی ثبت شد و برای اعضای پروژه قابل مشاهده است':'پیش‌نویس ذخیره شد؛ فقط خودت آن را می‌بینی';
+   showToast(base+(res.overwritten?'؛ جای نسخه قبلی با همین شماره و تاریخ را گرفت':'')+(local==='ok'?'':'. حافظه دستگاه پر بود و عکس‌های گزارش‌های قدیمی حذف شد'),'ok');
+ }catch(e){
+   console.error(e);
+   showToast('در سرور ذخیره نشد: '+(e.message||e)+'. یک نسخه روی همین دستگاه ماند','error');
+ }finally{
+   _saving=false;document.querySelectorAll('#tab-form .btn-row .btn, #lx-savebar button').forEach(b=>b.disabled=false);
    renderArch();
-   const chooser=withPdf&&canExportAny();
-   if(withPdf&&!chooser)generatePDF(d,true,myPdfView());
-   const pdfNote=withPdf&&!chooser?'؛ فایل PDF هم دانلود شد':'';
-   try{
-     await saveReportToSupabase(d);
-     if(typeof afterReportSaved==='function')afterReportSaved();
-     showToast((local==='ok'?'گزارش ذخیره شد':'گزارش در سرور ذخیره شد؛ حافظه دستگاه پر بود و عکس‌های گزارش‌های قدیمی حذف شد')+pdfNote,'ok');
-     if(chooser)openPdfChooser(d);
-   }catch(e){console.error(e);showToast('در سرور ذخیره نشد: '+(e.message||e)+'. نسخه روی همین دستگاه ذخیره شد'+pdfNote,'error');if(chooser)openPdfChooser(d);}
- }finally{_saving=false;document.querySelectorAll('#tab-form .btn-row .btn').forEach(b=>b.disabled=false);}
+ }
 }
 
-// ── archive (this device) ──
+// ── reports list: one place for server reports (final for everyone, drafts for their author) + unsent copies on this device ──
+const SRV={pid:null,list:null,busy:false,err:null};
+function openReportViewer(html,title){
+ document.getElementById('rv-title').textContent=title||'مشاهده گزارش';
+ document.getElementById('rv-frame').srcdoc=html;
+ document.getElementById('rv-modal').style.display='flex';
+}
+function closeReportViewer(){document.getElementById('rv-modal').style.display='none';document.getElementById('rv-frame').srcdoc='';}
+function reportKey(d){const n=parseReportNo(d.num||'');return n==null||!d.dateISO?null:n+'|'+d.dateISO;}
+function serverReportToDoc(r){
+ return{
+   num:r.report_number!=null?String(r.report_number):'',
+   date:fmtJ(isoToN(r.report_date||r.created_at)),dateISO:r.report_date,
+   day:r.report_day||'',addr:r.address||'',status:r.status||'final',
+   sections:(r.report_section_entries||[]).slice().sort((a,b)=>(a.sort??0)-(b.sort??0)).map(e=>({
+     id:e.section_id,title:e.title,kind:e.kind,config:e.config||{},
+     icon:projectSections.find(p=>p.id===e.section_id)?.icon,
+     data:e.kind==='photos'?{photos:(e.data?.photos||[]).map(p=>({cap:p.cap||''}))}:(e.data||{})
+   }))
+ };
+}
+// photos are kept only on the device that took them: show them when this device has its copy
+function withLocalPhotos(doc){
+ const k=reportKey(doc);if(!k)return doc;
+ const loc=readArchive().find(x=>reportKey(x)===k);if(!loc)return doc;
+ return{...doc,sections:doc.sections.map(s=>{
+   if(s.kind!=='photos')return s;
+   const ls=(loc.sections||[]).find(x=>x.id===s.id&&x.kind==='photos');
+   return ls&&(ls.data?.photos||[]).some(p=>p.src)?{...s,data:clone(ls.data)}:s;
+ })};
+}
+function canEditServerReport(r){
+ const mine=r.created_by===currentSession?.user?.id;
+ if(mine)return can('reports.create')||can('reports.edit_own')||can('reports.edit_any');
+ return r.status==='final'&&can('reports.edit_any');
+}
+async function renderServerReports(force){
+ if(!currentProject||!supabaseClient)return;
+ if(SRV.pid!==currentProject.id){SRV.pid=currentProject.id;SRV.list=null;SRV.err=null;}
+ if(SRV.list&&!force){renderArch();return;}
+ if(SRV.busy)return;SRV.busy=true;renderArch();
+ const pid=currentProject.id;
+ try{
+   const [rq,mq]=await Promise.all([
+     supabaseClient.from('reports').select('id,report_date,report_number,report_day,address,status,created_at,updated_at,created_by,report_section_entries(id,section_id,title,kind,config,data,sort)').eq('project_id',pid).order('report_date',{ascending:false}).order('created_at',{ascending:false}).limit(500),
+     supabaseClient.rpc('list_project_members',{p_project_id:pid})
+   ]);
+   if(rq.error)throw rq.error;
+   if(SRV.pid!==pid)return;
+   const names=new Map((mq.data||[]).map(m=>[m.user_id,m.full_name||m.email||'']));
+   SRV.list=(rq.data||[]).map(r=>({raw:r,doc:serverReportToDoc(r),author:r.created_by===currentSession?.user?.id?'خودت':(names.get(r.created_by)||'')}));
+   SRV.err=null;
+ }catch(e){console.error(e);SRV.err=e.message||String(e);}
+ finally{SRV.busy=false;}
+ renderArch();
+}
 function renderArch(){
  const c=document.getElementById('arch-list');if(!c)return;
- const list=readArchive();
- if(!list.length){c.innerHTML='<div class="muted" style="padding:8px 0">هنوز گزارشی روی این دستگاه ذخیره نشده.</div>';return;}
+ const srv=SRV.pid===currentProject?.id?SRV.list:null;
+ const srvKeys=new Set((srv||[]).map(x=>reportKey(x.doc)).filter(Boolean));
+ // copies on this device that never reached the server (or older ones the server doesn't have)
+ const local=readArchive().map((r,i)=>({r,i})).filter(({r})=>{
+   const k=reportKey(r);
+   if(r.unsynced)return !k||!srvKeys.has(k);
+   return !!(srv&&k&&!srvKeys.has(k));
+ });
  c.innerHTML='';
- list.forEach((r,i)=>{
-   const filled=(r.sections||[]).filter(hasContent);
-   const photos=(r.sections||[]).filter(s=>s.kind==='photos').reduce((n,s)=>n+(s.data?.photos?.length||0),0);
+ const note=t=>{const d=document.createElement('div');d.className='muted';d.style.padding='8px 0';d.textContent=t;c.appendChild(d);};
+ const btn=(label,icon,fn)=>{const b=document.createElement('button');b.type='button';b.className='btn';b.innerHTML=`<i class="ti ${icon}"></i>${label}`;b.onclick=fn;return b;};
+ const row=(title,meta,badge,actions)=>{
    const d=document.createElement('div');d.className='arch-item';
-   d.innerHTML=`<div><div style="font-size:13px;font-weight:600">${escapeHtml(r.date)}، ${escapeHtml(r.day)}</div><div class="muted">گزارش ${escapeHtml(r.num||'—')}، ${toFa(filled.length)} بخش پر شده${photos?'، '+toFa(photos)+' عکس':''}، ذخیره: ${escapeHtml(r.savedAt||'')}</div></div><div style="display:flex;gap:7px;align-items:center"><button class="btn sm" data-a="load"><i class="ti ti-eye"></i>بارگذاری</button><button class="btn sm" data-a="pdf"><i class="ti ti-file-type-pdf"></i>PDF</button><button class="del-btn" data-a="del" title="حذف از این دستگاه" aria-label="حذف"><i class="ti ti-trash"></i></button></div>`;
-   d.querySelector('[data-a=load]').onclick=()=>loadArch(i);
-   d.querySelector('[data-a=pdf]').onclick=()=>requestPDF(r);
-   d.querySelector('[data-a=del]').onclick=()=>delArch(i);
-   c.appendChild(d);
+   d.innerHTML=`<div><div style="font-size:13px;font-weight:600">${title}</div><div class="muted">${meta}</div>${badge?`<div class="muted" style="margin-top:4px;font-weight:600;color:${badge.color}">${badge.text}</div>`:''}</div><div class="arch-acts" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"></div>`;
+   actions.forEach(a=>d.querySelector('.arch-acts').appendChild(a));c.appendChild(d);
+ };
+ local.forEach(({r,i})=>{
+   const filled=(r.sections||[]).filter(hasContent).length;
+   row(`${escapeHtml(r.date)}${r.day?'، '+escapeHtml(r.day):''}`,`گزارش ${escapeHtml(r.num?toFa(r.num):'—')}، ${toFa(filled)} بخش پر شده`,
+     {text:'فقط روی همین دستگاه؛ به سرور نرسیده — بازش کن و دوباره ذخیره کن',color:'var(--amber, #b45309)'},
+     [btn('مشاهده','ti-eye',()=>generatePDF(r,'view',myPdfView())),btn('ادامه','ti-pencil',()=>loadArch(i)),btn('حذف','ti-trash',()=>delArch(i))]);
+ });
+ if(SRV.err)note('گزارش‌های سرور بارگذاری نشد: '+SRV.err);
+ else if(!srv)note('در حال بارگذاری گزارش‌ها...');
+ else if(!srv.length&&!local.length)note('هنوز گزارشی برای این پروژه ثبت نشده'+(can('reports.view')?'':' (نقش شما فقط گزارش‌های خودت را می‌بیند)')+'.');
+ (srv||[]).forEach(({raw,doc,author})=>{
+   const draft=doc.status==='draft';
+   const filled=doc.sections.filter(hasContent).length;
+   const acts=[btn('مشاهده','ti-eye',()=>{const v=withLocalPhotos(doc);generatePDF(v,'view',myPdfView());})];
+   if(!draft)acts.push(btn('PDF','ti-file-type-pdf',()=>requestPDF(withLocalPhotos(doc))));
+   if(canEditServerReport(raw))acts.push(btn(draft?'ادامه':'ویرایش','ti-pencil',()=>loadDocToForm(withLocalPhotos(doc))));
+   row(`${escapeHtml(doc.date)}${doc.day?'، '+escapeHtml(doc.day):''}`,
+     `گزارش ${escapeHtml(doc.num?toFa(doc.num):'—')}، ${toFa(filled)} بخش پر شده${author?'، ثبت: '+escapeHtml(author):''}`,
+     draft?{text:'پیش‌نویس — فقط خودت می‌بینی',color:'var(--amber, #b45309)'}:null,acts);
  });
 }
 function delArch(i){
- if(!confirm('این گزارش از حافظه این دستگاه حذف شود؟ (نسخه سرور حذف نمی‌شود)'))return;
+ if(!confirm('این نسخه از حافظه این دستگاه حذف شود؟'))return;
  const list=readArchive();list.splice(i,1);writeArchive(list);renderArch();showToast('از این دستگاه حذف شد','ok');
 }
-function loadArch(i){
- const r=readArchive()[i];if(!r)return;
+function setFormDate(iso){
+ if(!iso)return;
+ const [y,m,d]=String(iso).slice(0,10).split('-').map(Number);if(!y)return;
+ const j=gregorianToJalali(y,m,d);
+ selDate={y:j[0],m:j[1],d:j[2]};
+ const cy=document.getElementById('cal-year'),cm=document.getElementById('cal-month');
+ if(cy)cy.value=selDate.y;if(cm)cm.value=selDate.m;
+ updateDateDisplay();renderCal();
+}
+function loadDocToForm(r){
+ if(!r)return;
  formData={};let missing=0;
  (r.sections||[]).forEach(s=>{
    const def=projectSections.find(p=>p.id===s.id&&p.enabled);
@@ -2328,14 +2422,16 @@ function loadArch(i){
    if(def.kind==='table'&&!(d.rows||[]).length)d.rows=[newRow(def)];
    formData[s.id]=d;
  });
- document.getElementById('rnum').value=r.num||'';
+ setFormDate(r.dateISO);
+ document.getElementById('rnum').value=r.num?toFa(r.num):'';
  if(typeof setReportNumberManual==='function')setReportNumberManual(!!r.num); // a loaded report keeps its own number
  document.getElementById('raddr').value=r.addr||'';
  if(r.day)document.getElementById('rday').value=r.day;
  renderSections();
  sw('form',document.querySelectorAll('.tab')[0]);
- showToast(missing?`گزارش بارگذاری شد؛ ${toFa(missing)} بخش آن دیگر در فرم این پروژه نیست`:'گزارش بارگذاری شد','ok');
+ showToast((missing?`گزارش بارگذاری شد؛ ${toFa(missing)} بخش آن دیگر در فرم این پروژه نیست`:'گزارش بارگذاری شد')+'. با همین شماره و تاریخ ذخیره کنی، جای نسخه قبلی را می‌گیرد','ok');
 }
+function loadArch(i){loadDocToForm(readArchive()[i]);}
 
 
 // ── PDF per role ──
@@ -2471,6 +2567,7 @@ function generatePDF(d,quiet,view){
    html+='</div></div>';
  });
  html+=`<div class="footer"><span>گزارش روزانه بازسازی — ${proj}</span><span>تاریخ چاپ: ${today}</span></div></body></html>`;
+ if(quiet==='view'){openReportViewer(html.replace('</head>','<meta name="viewport" content="width=device-width,initial-scale=1"><style>body{width:auto;max-width:820px;padding:14px}.meta-grid{grid-template-columns:repeat(2,1fr)}table{display:block;overflow-x:auto;white-space:nowrap}</style></head>'),`گزارش ${d.num?toFa(d.num)+' — ':''}${d.date||''}`);return;}
  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
  const url=URL.createObjectURL(blob);const a=document.createElement('a');
  a.href=url;a.download='gozaresh-'+(d.num||'1')+'-'+(d.date||'').replace(/ /g,'_')+(v.label?'-'+v.label.replace(/\s+/g,'_'):'')+'.html';
@@ -2831,6 +2928,7 @@ function sw(name,el){
   if(name==='team')loadTeam();
   if(name==='timeline')renderTimelineTab();
   if(name==='archive'&&typeof renderExportCard==='function')renderExportCard();
+ if(name==='archive')renderServerReports(true);
 }
 
 // ── SUPABASE AUTH ───────────────────────────────────
@@ -3443,7 +3541,7 @@ const PD={
    if(!this._p)this._p=(async()=>{
      const {data,error}=await supabaseClient.from('reports')
        .select('id,report_date,report_number,created_at,tomorrow_plan,report_section_entries(id,section_id,title,kind,config,data,sort)')
-       .eq('project_id',this.pid).order('report_date',{ascending:true}).order('created_at',{ascending:true}).limit(5000);
+       .eq('project_id',this.pid).eq('status','final').order('report_date',{ascending:true}).order('created_at',{ascending:true}).limit(5000);
      if(error){this._p=null;throw error;}
      this.reports=(data||[]).map(r=>({...r,n:isoToN(r.report_date||r.created_at),entries:(r.report_section_entries||[]).sort((a,b)=>(a.sort??0)-(b.sort??0))})).sort((a,b)=>a.n-b.n||(a.created_at<b.created_at?-1:a.created_at>b.created_at?1:0));
      return this.reports;
@@ -3666,7 +3764,8 @@ function onProjectOpened(){
    .catch(e=>{console.error(e);showToast('برنامه زمانی بارگذاری نشد: '+(e.message||e),'error');});
 }
 function afterReportSaved(){
- PD.invalidate();
+ PD.invalidate();SRV.list=null;
+ if(document.getElementById('tab-archive')?.style.display!=='none')renderServerReports(true);
  if(typeof suggestReportNumber==='function')suggestReportNumber(true); // every save creates a new report, so move on to the next number
  if(TL.loaded){TL.loaded=false;TL.load().then(()=>{if(document.getElementById('tab-timeline').style.display!=='none')renderTimelineTab();}).catch(e=>console.error(e));}
 }
@@ -4739,7 +4838,7 @@ function lxHead(){
  $('lx-msub').textContent=t==='overview'?todayTxt:sub;$('lx-mproj').textContent=proj;$('lx-mtitle').textContent=mt;
  const a=$('lx-actions');a.innerHTML='';
  if(t==='overview'&&can('reports.create'))a.append(btn('ثبت گزارش امروز','ti-plus',true,lxGoForm));
- if(t==='form'&&can('reports.create')){a.append(btn('فقط ذخیره',null,false,()=>saveReport(false)));a.append(btn('ذخیره و خروجی PDF','ti-file-type-pdf',true,()=>saveReport(true)));}
+ if(t==='form'&&can('reports.create')){a.append(btn('ذخیره پیش‌نویس',null,false,()=>saveReport('draft')));a.append(btn('ثبت نهایی','ti-circle-check',true,()=>saveReport('final')));}
 }
 let _lastRnum='';
 setInterval(()=>{if(lxTab!=='form')return;const v=$('rnum')?.value||'';if(v!==_lastRnum){_lastRnum=v;lxHead();}},800);
