@@ -2368,8 +2368,7 @@ function renderArch(){
  // copies on this device that never reached the server (or older ones the server doesn't have)
  const local=readArchive().map((r,i)=>({r,i})).filter(({r})=>{
    const k=reportKey(r);
-   if(r.unsynced)return !k||!srvKeys.has(k);
-   return !!(srv&&k&&!srvKeys.has(k));
+   return r.unsynced===true&&(!k||!srvKeys.has(k));
  });
  c.innerHTML='';
  const note=t=>{const d=document.createElement('div');d.className='muted';d.style.padding='8px 0';d.textContent=t;c.appendChild(d);};
@@ -2394,10 +2393,26 @@ function renderArch(){
    const acts=[btn('مشاهده','ti-eye',()=>{const v=withLocalPhotos(doc);generatePDF(v,'view',myPdfView());})];
    if(!draft)acts.push(btn('PDF','ti-file-type-pdf',()=>requestPDF(withLocalPhotos(doc))));
    if(canEditServerReport(raw))acts.push(btn(draft?'ادامه':'ویرایش','ti-pencil',()=>loadDocToForm(withLocalPhotos(doc))));
+   if(can('reports.delete_any')){const b=btn('حذف','ti-trash',()=>deleteServerReport(raw,doc));b.classList.add('danger');acts.push(b);}
    row(`${escapeHtml(doc.date)}${doc.day?'، '+escapeHtml(doc.day):''}`,
      `گزارش ${escapeHtml(doc.num?toFa(doc.num):'—')}، ${toFa(filled)} بخش پر شده${author?'، ثبت: '+escapeHtml(author):''}`,
      draft?{text:'پیش‌نویس — فقط خودت می‌بینی',color:'var(--amber, #b45309)'}:null,acts);
  });
+}
+async function deleteServerReport(raw,doc){
+ if(!can('reports.delete_any')){showToast('فقط مالک و مدیر پروژه می‌توانند گزارش را حذف کنند','error');return;}
+ const label=`گزارش ${doc.num?toFa(doc.num):'بدون شماره'} — ${doc.date||''}`;
+ if(!confirm(label+'\n\nاین گزارش برای همیشه از سرور و برای همه اعضا حذف می‌شود و قابل برگشت نیست. حذف شود؟'))return;
+ try{
+   const {data,error}=await supabaseClient.from('reports').delete().eq('id',raw.id).select('id');
+   if(error)throw error;
+   if(!data||!data.length)throw new Error('گزارش حذف نشد؛ شاید قبلاً حذف شده یا اجازه حذفش را نداری');
+   // drop this device's copy too, so the deleted report does not come back as an unsent copy
+   const k=reportKey(doc);if(k){const l=readArchive();const rest=l.filter(r=>reportKey(r)!==k);if(rest.length!==l.length)writeArchive(rest);}
+   PD.invalidate();SRV.list=null;
+   showToast(label+' حذف شد','ok');
+   renderServerReports(true);
+ }catch(e){console.error(e);showToast('حذف نشد: '+(e.message||e),'error');}
 }
 function delArch(i){
  if(!confirm('این نسخه از حافظه این دستگاه حذف شود؟'))return;
